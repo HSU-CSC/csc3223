@@ -11,6 +11,7 @@ import java.util.HashMap;
  */
 public class Graph {
     private Node current;
+    public int counter;
 
     public Graph()
     {
@@ -28,31 +29,72 @@ public class Graph {
      * a node without a reference to another is made. If there are two nodes, the second node will reference the first
      * one making a circular linked list.
      */
-    public void addNode(String cityName)
+    public void addNode(String cityName, String connection, Integer distance)
     {
         Node newNode = new Node(cityName);
+        Node otherNode =  new Node(connection);
+        newNode.addConnection(connection,distance);
+        otherNode.addConnection(cityName,distance);
         Node top = current;
-
         //Adds to the front if there are no current nodes.
         if(current == null)
         {
+
+            //makes the new node
             current = newNode;
+            counter++;
+
+            //sets its next reference to the other city making the bidirectional edge
+            current.next = otherNode;
+            otherNode.next = current;
+            counter++;
         }else{
-            if(hasNext())
+            //finds the end of the list and adds the new node if its not there.
+            if(!contains(newNode.name))
             {
-                //finds the end of the list
-                while(current.next != top)
+                for(int i = 0; i< counter-1;i++)
                 {
                     next();
-                }//end while
+                }//end for
+                current.next = newNode;
                 newNode.next = top;
-                current.next = newNode;
+                counter++;
             }else{
-                current.next = newNode;
-                newNode.next = current;
+                find(cityName);
+                current.addConnection(connection,distance);
+            }
+
+            //adds the reverse node if it doesn't exist.
+            if(!contains(otherNode.name))
+            {
+                current = top;
+                for(int i = 0; i< counter-1;i++)
+                {
+                    next();
+                }//end for
+                current.next = otherNode;
+                otherNode.next = top;
+                counter++;
+            }else{
+                find(connection);
+                current.addConnection(cityName,distance);
             }
         }
     }//end addNode
+
+    private boolean contains(String city)
+    {
+        boolean found = false;
+        for(int i = 0; i< counter; i++){
+            if(current.name.equalsIgnoreCase(city))
+            {
+                found = true;
+            }
+            next();
+        }
+
+        return found;
+    }
 
     /**
      * Goes to the next node in the graph.
@@ -75,6 +117,23 @@ public class Graph {
         return value;
     }//end hasNext;
 
+    private void find(String searchItem){
+        boolean found = false;
+        int count = 0;
+        while(!found && count <counter)
+        {
+            next();
+            if(current.name.equalsIgnoreCase(searchItem)){
+                found = true;
+            }
+        }
+    }
+
+    public void printConnections()
+    {
+        System.out.println(current.connections.toString());
+    }//end printConnections
+
     protected class Node
     {
         protected String name;
@@ -90,6 +149,7 @@ public class Graph {
         public Node(String name)
         {
             this.name = name;
+            connections = new HashMap<String,Integer>();
             visited = false;
         }//end node constructor
 
@@ -117,9 +177,5 @@ public class Graph {
         /**
          * Prints out the adjacent cities and their distance to the node
          */
-        public void printConnections()
-        {
-            System.out.println(connections.toString());
-        }//end printConnections
     }//end Node
 }//end Graph
