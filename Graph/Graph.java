@@ -1,4 +1,8 @@
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+//import Graph.GraphIterator;
 
 /**
  * Created by Alan on 4/14/2016.
@@ -9,8 +13,9 @@ import java.util.HashMap;
  * particular node easier. Without a beginning or end to the list, the end point is determined by making a temp
  * Node called top and making sure that the next node is not the one that was set to top.
  */
-public class Graph {
-    private Node current;
+public class Graph implements Iterable<Node>
+{
+    public Node current;
     public int counter;
 
     public Graph()
@@ -98,6 +103,7 @@ public class Graph {
 
     /**
      * Goes to the next node in the graph.
+     * @return 
      */
     public void next()
     {
@@ -133,49 +139,46 @@ public class Graph {
     {
         System.out.println(current.connections.toString());
     }//end printConnections
+    
+    public Iterator<Node> iterator()
+	{
+		return new GraphIterator();
+	}
+	
+	public class GraphIterator implements Iterator<Node>
+	{
+		private int tracker;
+		public GraphIterator()
+		{
+			tracker = 0;
+		}
+		
+		public boolean hasNext()
+		{
+			if(current.next != null)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public Node next()
+		{
+			String nodeName = current.next.name;
+			if(hasNext() && tracker < counter-1)
+			{
+				tracker++;
+				current = current.next;
+				return current;
+			}
+			throw new NoSuchElementException();
+		}
 
-    protected class Node
-    {
-        protected String name;
-        protected boolean visited;
-        protected HashMap<String, Integer> connections;
-        protected Node next;
-
-        /**
-         * Constructs an unvisited Node with the specified name.
-         *
-         * @param name the name of the city that will be represented in the Node.
-         */
-        public Node(String name)
-        {
-            this.name = name;
-            connections = new HashMap<String,Integer>();
-            visited = false;
-        }//end node constructor
-
-        /**
-         * @return false if the node has not been visited yet.
-         */
-        public boolean isVisited()
-        {
-            return visited;
-        }//end isVisited
-
-        /**
-         * This adds a connection to the current Node's HashMap containing another city's name and the distance
-         * from the current city to the next city.
-         *
-         * @param cityName the city that it is being connected to.
-         * @param distance the distance to the other city.
-         */
-        public void addConnection(String cityName, Integer distance) {
-
-            //needs to check that the hash map doesn't already contain that city's name before adding it in.
-            connections.put(cityName, distance);
-        }//end addConnections
-
-        /**
-         * Prints out the adjacent cities and their distance to the node
-         */
-    }//end Node
+		public void remove() 
+		{
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
 }//end Graph
