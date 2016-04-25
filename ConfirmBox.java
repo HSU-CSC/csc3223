@@ -35,12 +35,20 @@ public class ConfirmBox {
             });
 
 
+            HBox btnLayout = new HBox(5);
+            btnLayout.getChildren().addAll(btnYes, btnNo);
+            btnLayout.setAlignment(Pos.CENTER);
+            btnLayout.setSpacing(10);
+
             VBox layout = new VBox(8);
-            layout.getChildren().addAll(label, btnYes, btnNo);
+            layout.getChildren().addAll(label, btnLayout);
             layout.setAlignment(Pos.CENTER);
+            layout.setSpacing(10);
             layout.setPadding(new Insets(10,10,10,10));
 
+
             Scene scene = new Scene(layout);
+            scene.getStylesheets().add("Styles.css");
             window.setScene(scene);
             window.showAndWait(); //Needs to be closed before showing next window
 
