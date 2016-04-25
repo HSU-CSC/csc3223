@@ -21,7 +21,9 @@ public class AlertBox {
 
         Label label = new Label();
         label.setText(message);
-        Button closeButton = new Button("Close the window");
+
+        Button closeButton = new Button("Close");
+
         closeButton.setOnAction(e -> window.close());
 
         VBox layout = new VBox(20);
@@ -29,8 +31,10 @@ public class AlertBox {
         layout.setAlignment(Pos.CENTER);
 
         Scene scene = new Scene(layout);
+
+        scene.getStylesheets().add("Styles.css");
         window.setScene(scene);
-        window.setResizable(false);
+
         window.showAndWait(); //Needs to be closed before showing next window
     }
 
