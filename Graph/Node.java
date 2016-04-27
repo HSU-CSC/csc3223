@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.Set;
 
 public class Node
     {
@@ -26,6 +27,11 @@ public class Node
         {
             return visited;
         }//end isVisited
+        
+        public void visit()
+        {
+        	visited = true;
+        }
 
         /**
          * This adds a connection to the current Node's HashMap containing another city's name and the distance
@@ -43,4 +49,23 @@ public class Node
         /**
          * Prints out the adjacent cities and their distance to the node
          */
+       
+       public boolean hasConnections()
+       {
+    	   return !connections.isEmpty();
+       }
+       
+       public Set<String> getConnections()
+       {
+    	   return connections.keySet(); 
+       }
+       
+       public void printConnections()
+       {
+           System.out.println(connections.toString());
+       }//end printConnections
+       public String toString()
+       {
+    	   return name;
+       }
     }//end Node
