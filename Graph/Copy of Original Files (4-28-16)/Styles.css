@@ -1,30 +1,26 @@
 .root{
+    /*-fx-background-color: #383838; //dark gray*/
     -fx-background-color: linear-gradient(#E2C794, #FDEAC4); //light tan
-    -fx-padding: 4;
 }
 
 .button{
+    /*-fx-background-color: linear-gradient(#7CAFC2, #AFD3E1); //medium dusty blue, light blue*/
     -fx-background-color: #AFD3E1; //light dusty blue
     -fx-background-radius: 4;
     -fx-border-radius: 4;
     -fx-border-color: #000000;
 }
+
 .button:hover {
     -fx-background-color: #B4EAC2; //light green
     -fx-border-radius: 4;
     -fx-border-color: #000000;
 }
+
 .button:pressed {
     -fx-background-color: #E0F0F7; //pale blue
     -fx-border-radius: 4;
     -fx-border-color: #000000;
-}
-
-.text_label {
-    -fx-padding: 5,10,20,40; //top,right,bottom,left
-    -fx-text-fill: #034159;
-    -fx-font-weight: bold;
-    /*-fx-font-size: 16;*/
 }
 
 

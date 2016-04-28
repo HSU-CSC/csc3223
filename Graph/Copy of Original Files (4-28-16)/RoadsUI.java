@@ -5,7 +5,6 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -35,8 +34,6 @@ public class RoadsUI extends Application {
     final private Button next = new Button("Next");
     final private Button back = new Button("Back");
     final private Button menu = new Button("Menu");
-    ComboBox<String> comboStart = new ComboBox<>();
-    ComboBox<String> comboEnd = new ComboBox<>();
 
 
     public static void main(String [] args)
@@ -72,11 +69,9 @@ public class RoadsUI extends Application {
             closeProgram();
         });
 
-        window.setTitle("Graphs!");
-        window.setScene(scene);
-        window.show();
-
-        scene.getStylesheets().add("Graph/Styles.css");
+        primaryStage.setTitle("Graphs!!");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     /**
@@ -137,7 +132,7 @@ public class RoadsUI extends Application {
         next.setDefaultButton(true);
         back.setCancelButton(true);
 
-        tField.setPromptText("C:\\documents\\jane\\cityName"); //Displays Prompt text as example file path
+        tField.setPromptText("C:\\documents\\jane\\cityRecord"); //Displays Prompt text as example file path
         tField.setPrefColumnCount(15);
         //makes use of css to make the prompt display initially
         tField.setStyle("-fx-prompt-text-fill: derive(-fx-control-inner-background,-30%); }");
@@ -245,85 +240,13 @@ public class RoadsUI extends Application {
 
         scene.setRoot(stack);
 
-        //To do: Make a next button listener and transfer control to the next appropriate screen
-
-        next.setOnAction(event -> {
-            event.consume();
-            findRouteScreen();
-        });
+        //To do, make a next button listener and transfer control to the next appropriate screen
 
         back.setOnAction(event -> {
             event.consume();
             fileChoiceScreen();
         });
-
     }
-
-    private void findRouteScreen(){
-        //-----------------------------------
-        //ERROR: Problem with ComboBoxes
-        //-----------------------------------
-
-        StackPane stack = new StackPane();
-        //ComboBox<String> comboStart = new ComboBox<>();
-        //ComboBox<String> comboEnd = new ComboBox<>();
-        String startPoint = "";
-        String endPoint = "";
-
-        Text start = new Text("Starting Point: ");
-            start.getStyleClass().add("text_label");
-        Text end = new Text("Ending Point: ");
-            end.getStyleClass().add("text_label");
-        HBox hb1 = new HBox(40);
-        VBox vbStart = new VBox(8);
-        VBox vbEnd = new VBox(8);
-
-        System.out.println("");
-
-        comboStart.setPromptText("[Start City]");
-        comboEnd.setPromptText("[End City]");
-
-        //Populate ComboBoxes
-        comboStart.getItems().addAll(
-                "Hot Springs",
-                "Malvern",
-                "Arkadelphia"
-        );
-        comboEnd.getItems().addAll(
-                "Hot Springs",
-                "Malvern",
-                "Arkadelphia"
-        );
-
-        //Get values from ComboBoxes
-        startPoint = comboStart.getValue();
-        System.out.println(startPoint);
-        endPoint = comboEnd.getValue();
-        System.out.println(endPoint);
-
-        //Layout
-        vbStart.getChildren().addAll(start, comboStart);
-        vbEnd.getChildren().addAll(end, comboEnd);
-
-        hb1.getChildren().addAll(vbStart, vbEnd);
-        hb1.setAlignment(Pos.CENTER);
-
-        stack.getChildren().addAll(hb1, back, next);
-        stack.setAlignment(back, Pos.BOTTOM_LEFT);
-        stack.setAlignment(next, Pos.BOTTOM_RIGHT);
-
-        scene.setRoot(stack);
-
-        //To do: Make a next button listener and transfer control to the next appropriate screen
-
-        back.setOnAction(event -> {
-            event.consume();
-            menuScreen();
-        });
-
-    }
-
-
     //SCREENS TO BE MADE: {
 
     //public void minSpanInputScreen()
@@ -351,9 +274,7 @@ public class RoadsUI extends Application {
         while(in.hasNextLine())
         {
             tokens = in.nextLine().split(",");
-            //To do: check formatting of line and add contents to the Graph
-
-            //To Do: populate comboBoxes with locations
+            //to do, check formatting of line and add contents to the Graph
         }
     }
 
