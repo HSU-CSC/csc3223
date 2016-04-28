@@ -1,0 +1,10 @@
+Arkadelphia, Hot Springs, 31
+Arkadelphia, Malvern, 20
+Malvern, Little Rock, 32
+Malvern, Hot Springs, 18
+Malvern, Pine Bluff, 25
+Little Rock, Pine Bluff, 40
+Arkadelphia, Prescott, 27
+Prescott, Hope, 16
+Hope, Camden, 29
+Camden, Pine Bluff, 71

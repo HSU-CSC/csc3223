@@ -1,4 +1,5 @@
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Created by Alan on 4/14/2016.
@@ -9,8 +10,10 @@ import java.util.HashMap;
  * particular node easier. Without a beginning or end to the list, the end point is determined by making a temp
  * Node called top and making sure that the next node is not the one that was set to top.
  */
-public class Graph {
-    private Node current;
+public class Graph implements Iterable<Node>
+{
+    public Node current;
+    public int counter;
 
     public Graph()
     {
@@ -28,34 +31,76 @@ public class Graph {
      * a node without a reference to another is made. If there are two nodes, the second node will reference the first
      * one making a circular linked list.
      */
-    public void addNode(String cityName)
+    public void addNode(String cityName, String connection, Integer distance)
     {
         Node newNode = new Node(cityName);
+        Node otherNode =  new Node(connection);
+        newNode.addConnection(connection,distance);
+        otherNode.addConnection(cityName,distance);
         Node top = current;
-
         //Adds to the front if there are no current nodes.
         if(current == null)
         {
+
+            //makes the new node
             current = newNode;
+            counter++;
+
+            //sets its next reference to the other city making the bidirectional edge
+            current.next = otherNode;
+            otherNode.next = current;
+            counter++;
         }else{
-            if(hasNext())
+            //finds the end of the list and adds the new node if its not there.
+            if(!contains(newNode.name))
             {
-                //finds the end of the list
-                while(current.next != top)
+                for(int i = 0; i< counter-1;i++)
                 {
                     next();
-                }//end while
+                }//end for
+                current.next = newNode;
                 newNode.next = top;
-                current.next = newNode;
+                counter++;
             }else{
-                current.next = newNode;
-                newNode.next = current;
+                find(cityName);
+                current.addConnection(connection,distance);
+            }
+
+            //adds the reverse node if it doesn't exist.
+            if(!contains(otherNode.name))
+            {
+                current = top;
+                for(int i = 0; i< counter-1;i++)
+                {
+                    next();
+                }//end for
+                current.next = otherNode;
+                otherNode.next = top;
+                counter++;
+            }else{
+                find(connection);
+                current.addConnection(cityName,distance);
             }
         }
     }//end addNode
 
+    public boolean contains(String city)
+    {
+        boolean found = false;
+        for(int i = 0; i< counter; i++){
+            if(current.name.equalsIgnoreCase(city))
+            {
+                found = true;
+            }
+            next();
+        }
+
+        return found;
+    }
+
     /**
      * Goes to the next node in the graph.
+     * @return 
      */
     public void next()
     {
@@ -75,51 +120,86 @@ public class Graph {
         return value;
     }//end hasNext;
 
-    protected class Node
+    public boolean find(String searchItem)
     {
-        protected String name;
-        protected boolean visited;
-        protected HashMap<String, Integer> connections;
-        protected Node next;
-
-        /**
-         * Constructs an unvisited Node with the specified name.
-         *
-         * @param name the name of the city that will be represented in the Node.
-         */
-        public Node(String name)
+        boolean found = false;
+        int count = 0;
+        while(!found && count <counter)
         {
-            this.name = name;
-            visited = false;
-        }//end node constructor
-
-        /**
-         * @return false if the node has not been visited yet.
-         */
-        public boolean isVisited()
+            next();
+            if(current.name.equalsIgnoreCase(searchItem))
+            {
+                found = true;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public Node get(String searchItem)
+    {
+    	boolean found = false;
+        int count = 0;
+        while(!found && count <counter)
         {
-            return visited;
-        }//end isVisited
+            next();
+            if(current.name.equalsIgnoreCase(searchItem))
+            {
+            found =true;
+            return current;
+            }
+        }
+        return null;
+    }
+    
+    public Node getCurrent()
+    {
+    	return current;
+    }
 
-        /**
-         * This adds a connection to the current Node's HashMap containing another city's name and the distance
-         * from the current city to the next city.
-         *
-         * @param cityName the city that it is being connected to.
-         * @param distance the distance to the other city.
-         */
-        public void addConnection(String cityName, Integer distance) {
+    
+    public Iterator<Node> iterator()
+	{
+		return new GraphIterator();
+	}
+	
+	public class GraphIterator implements Iterator<Node>
+	{
+		private int tracker;
+		public GraphIterator()
+		{
+			tracker = 0;
+		}
+		
+		public boolean hasNext()
+		{
+			if(current.next != null)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public Node next()
+		{
+			//String nodeName = current.next.name;
+			if(hasNext() && tracker < counter-1)
+			{
+				tracker++;
+				current = current.next;
+				return current;
+			}
+			throw new NoSuchElementException();
+		}
 
-            //needs to check that the hash map doesn't already contain that city's name before adding it in.
-            connections.put(cityName, distance);
-        }//end addConnections
-
-        /**
-         * Prints out the adjacent cities and their distance to the node
-         */
-        public void printConnections()
-        {
-            System.out.println(connections.toString());
-        }//end printConnections
-    }//end Node
-}//end Graph
+		public void remove() 
+		{
+			// TODO Auto-generated method stub
+			
+		}
+		
+		
+		
+		
+	}
+}//end Graph﻿
