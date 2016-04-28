@@ -31,7 +31,7 @@ public class Graph implements Iterable<Node>
      * a node without a reference to another is made. If there are two nodes, the second node will reference the first
      * one making a circular linked list.
      */
-    public void addNode(String cityName, String connection, Integer distance)
+    public void addNode(String cityName, String connection, Double distance)
     {
         Node newNode = new Node(cityName);
         Node otherNode =  new Node(connection);
@@ -130,10 +130,10 @@ public class Graph implements Iterable<Node>
             if(current.name.equalsIgnoreCase(searchItem))
             {
                 found = true;
-                return true;
+
             }
         }
-        return false;
+        return found;
     }
     
     public Node get(String searchItem)
