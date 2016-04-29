@@ -29,18 +29,7 @@ public void traversal(Graph g, Node n, ArrayList<Node> visited)
 					}
 				}
 			}
-			else
-			{
-				System.out.println(n);
-				return;
-			}
-		}
-		else
-		{
-			System.out.println(n);
-//			g.next();
-			return;
-//			traversal(g,g.getCurrent(),visited);
+			
 		}
     }
 }
