@@ -11,11 +11,16 @@ public class ConfirmBox {
 
     static boolean answer;
 
-        public static boolean display(String title, String message){
+        public static boolean display(String title, String message, Stage parent){
             Stage window = new Stage();
             window.initModality(Modality.APPLICATION_MODAL); //Forces to address this box
             window.setTitle(title);
-            window.setMinWidth(280);
+            window.setHeight(100);
+            window.setWidth(280);
+            //ensures that the new window pops up in the center of the parent window
+            window.setX(parent.getX() + parent.getWidth() / 2 - window.getWidth() /2);
+            window.setY(parent.getY() + parent.getHeight() /2 - window.getHeight() /2);
+            window.setResizable(false);
 
             Label label = new Label();
             label.setText(message);

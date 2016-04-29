@@ -5,7 +5,7 @@ public class Node
     {
         protected String name;
         protected boolean visited;
-        protected HashMap<String, Integer> connections;
+        protected HashMap<String, Double> connections;
         protected Node next;
 
         /**
@@ -16,7 +16,7 @@ public class Node
         public Node(String name)
         {
             this.name = name;
-            connections = new HashMap<String,Integer>();
+            connections = new HashMap<String,Double>();
             visited = false;
         }//end node constructor
 
@@ -40,7 +40,7 @@ public class Node
          * @param cityName the city that it is being connected to.
          * @param distance the distance to the other city.
          */
-        public void addConnection(String cityName, Integer distance) {
+        public void addConnection(String cityName, Double distance) {
 
             //needs to check that the hash map doesn't already contain that city's name before adding it in.
             connections.put(cityName, distance);
