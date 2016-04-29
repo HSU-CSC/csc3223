@@ -1,8 +1,5 @@
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-//import Graph.GraphIterator;
 
 /**
  * Created by Alan on 4/14/2016.
@@ -34,7 +31,7 @@ public class Graph implements Iterable<Node>
      * a node without a reference to another is made. If there are two nodes, the second node will reference the first
      * one making a circular linked list.
      */
-    public void addNode(String cityName, String connection, Integer distance)
+    public void addNode(String cityName, String connection, Double distance)
     {
         Node newNode = new Node(cityName);
         Node otherNode =  new Node(connection);
@@ -87,7 +84,7 @@ public class Graph implements Iterable<Node>
         }
     }//end addNode
 
-    private boolean contains(String city)
+    public boolean contains(String city)
     {
         boolean found = false;
         for(int i = 0; i< counter; i++){
@@ -123,22 +120,43 @@ public class Graph implements Iterable<Node>
         return value;
     }//end hasNext;
 
-    private void find(String searchItem){
+    public boolean find(String searchItem)
+    {
         boolean found = false;
         int count = 0;
         while(!found && count <counter)
         {
             next();
-            if(current.name.equalsIgnoreCase(searchItem)){
+            if(current.name.equalsIgnoreCase(searchItem))
+            {
                 found = true;
+
             }
         }
+        return found;
+    }
+    
+    public Node get(String searchItem)
+    {
+    	boolean found = false;
+        int count = 0;
+        while(!found && count <counter)
+        {
+            next();
+            if(current.name.equalsIgnoreCase(searchItem))
+            {
+            found =true;
+            return current;
+            }
+        }
+        return null;
+    }
+    
+    public Node getCurrent()
+    {
+    	return current;
     }
 
-    public void printConnections()
-    {
-        System.out.println(current.connections.toString());
-    }//end printConnections
     
     public Iterator<Node> iterator()
 	{
@@ -164,7 +182,7 @@ public class Graph implements Iterable<Node>
 		
 		public Node next()
 		{
-			String nodeName = current.next.name;
+			//String nodeName = current.next.name;
 			if(hasNext() && tracker < counter-1)
 			{
 				tracker++;
@@ -180,5 +198,8 @@ public class Graph implements Iterable<Node>
 			
 		}
 		
+		
+		
+		
 	}
-}//end Graph
+}//end Graph﻿

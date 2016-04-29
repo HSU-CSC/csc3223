@@ -1,23 +1,28 @@
+import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.Bloom;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
+import javafx.util.Duration;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
+
 
 /**
  * @author Jonathan Oler, Candace Speers, Yerenia Adame
@@ -25,8 +30,10 @@ import java.util.Scanner;
 public class RoadsUI extends Application {
 
     private Scene scene;
+    private final ObservableList<String> origins = FXCollections.observableArrayList();
+
     Stage window;
-   // private Graph graph;
+    private final Graph graph = new Graph();
 
     final private Button exit = new Button("Exit");
     final private Button next = new Button("Next");
@@ -66,7 +73,7 @@ public class RoadsUI extends Application {
             e.consume(); //Tells system "We're gonna take care of it"
             closeProgram();
         });
-
+        scene.getStylesheets().add("Styles.css");
         primaryStage.setTitle("Graphs!!");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -80,10 +87,12 @@ public class RoadsUI extends Application {
      */
     public void beginScreen()
     {
-        back.setCancelButton(false);
+
         Button begin = new Button("Begin");
         StackPane stack = new StackPane();
         Text message = new Text();
+
+        back.setCancelButton(false);
 
         begin.setText("Begin");
         begin.setDefaultButton(true);
@@ -125,6 +134,10 @@ public class RoadsUI extends Application {
 
         HBox hb = new HBox();
 
+        VBox vb = new VBox();
+
+        Text error = new Text();
+
         StackPane stack = new StackPane();
 
         next.setDefaultButton(true);
@@ -139,8 +152,11 @@ public class RoadsUI extends Application {
         hb.setAlignment(Pos.CENTER);
         hb.setSpacing(10.0);
 
-        stack.getChildren().addAll(hb, back, next);
-        StackPane.setAlignment(hb, Pos.CENTER);
+        vb.getChildren().addAll(hb, error);
+        vb.setAlignment(Pos.CENTER);
+        vb.setSpacing(5.0);
+
+        stack.getChildren().addAll(vb, back, next);
         StackPane.setAlignment(back, Pos.BOTTOM_LEFT);
         StackPane.setAlignment(next, Pos.BOTTOM_RIGHT);
 
@@ -157,7 +173,7 @@ public class RoadsUI extends Application {
             else
                 fChoice.setInitialDirectory(new File("c:/")); //if the location cannot be accessed, starts at hard drive
 
-            input = fChoice.showOpenDialog(new Stage());
+            input = fChoice.showOpenDialog(window);
 
             if(input != null)
                 tField.setText(input.getAbsolutePath()); //if a file was selected, stores the path name in the text field
@@ -167,16 +183,23 @@ public class RoadsUI extends Application {
 
         next.setOnAction(event -> {
             event.consume();
-
-            try
+            if(tField.getText().trim().isEmpty())
             {
-                populateGraph(tField.getText());
-                menuScreen();
+                error.setText("Please enter a path name to continue!");
+                error.setFill(Color.RED);
+                error.setTextAlignment(TextAlignment.RIGHT);
+                error.setEffect(createFlashEffect());
             }
-            catch(IOException ex)
+            else
             {
-                //if the given file cannot be read, will display an error message
-                AlertBox.display("ERROR", "File cannot be found! Please Try Again.");
+                try {
+                    error.setText("");
+                    populateGraph(tField.getText());
+                    menuScreen();
+                } catch (IOException ex) {
+                    //if the given file cannot be read, will display an error message
+                    AlertBox.display("ERROR", "File cannot be found! Please Try Again.", window);
+                }
             }
         });
 
@@ -205,17 +228,22 @@ public class RoadsUI extends Application {
                                   " name of two cites and will\n then determine the shortest path between them."};
 
         Text message = new Text("Please choose one of the following options:");
-        Text hint = new Text("*Place Cursor on Option for description*");
+        Text hint = new Text("*Place Cursor on Option for a description*");
+        Text error = new Text();
 
-        Tooltip tips = new Tooltip(descriptions[0]);
+        Tooltip tips = new Tooltip();
 
-        ChoiceBox cb = new ChoiceBox();
+        ComboBox cb = new ComboBox();
 
         hint.setFont(new Font(10.0));
         hint.setFill(Color.GREY);
-        //sets the title for the options to select from
+
         cb.setItems(FXCollections.observableArrayList("Determine Minimum Spanning Tree", "Determine Shortest Path"));
-        cb.getSelectionModel().select(0); //sets the default option to the first choice.
+        //sets the title for the options to select from
+        cb.setPromptText("Options");
+        tips.setText("HURRY UP AN CHOOSE A OPTION \nYA DINGUS!");
+        tips.setTextAlignment(TextAlignment.CENTER);
+        cb.setTooltip(tips);
 
         //This makes use of an anonymous class declaration inorder to attach a listener to the ChoiceBox object.
         cb.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
@@ -227,28 +255,73 @@ public class RoadsUI extends Application {
             }
         });
 
-        vb.getChildren().addAll(message, cb);
+        vb.getChildren().addAll(message, cb, error);
         vb.setAlignment(Pos.CENTER);
 
         stack.getChildren().addAll(vb, hint, back, next);
-        StackPane.setAlignment(vb, Pos.CENTER);
         StackPane.setAlignment(hint, Pos.BOTTOM_CENTER);
         StackPane.setAlignment(back, Pos.BOTTOM_LEFT);
         StackPane.setAlignment(next, Pos.BOTTOM_RIGHT);
 
         scene.setRoot(stack);
 
-        //To do, make a next button listener and transfer control to the next appropriate screen
+
+        next.setOnAction(event -> {
+            switch(cb.getSelectionModel().getSelectedIndex())
+            {
+                case 0 :
+                   minSpanInputScreen(); break;
+                case 1 :
+                    //shortPathInputScreen()
+                    break;
+                default : {
+                    error.setText("Please choose an option to continue!");
+                    error.setFill(Color.RED);
+                    error.setEffect(createFlashEffect());
+
+                    break;
+                }
+            }
+        });
 
         back.setOnAction(event -> {
             event.consume();
             fileChoiceScreen();
         });
     }
+
+    public void minSpanInputScreen()
+    {
+        StackPane stack = new StackPane();
+
+        ComboBox<ListView> cb = new ComboBox(origins);
+        Text message = new Text("Please choose one of the following origins: ");
+        VBox vb = new VBox();
+
+        cb.setPromptText("Origins");
+        cb.setVisibleRowCount(4);
+
+        vb.getChildren().addAll(message, cb);
+        vb.setAlignment(Pos.CENTER);
+
+        stack.getChildren().addAll(vb, back, next);
+        StackPane.setAlignment(back, Pos.BOTTOM_LEFT);
+        StackPane.setAlignment(next, Pos.BOTTOM_RIGHT);
+
+        scene.setRoot(stack);
+
+        next.setOnAction(event -> {
+            //event.consume();
+           // minSpanResultScreen(listBox.getSelectionModel().getSelectedItem());
+        });
+
+        back.setOnAction(event -> {
+            event.consume();
+            menuScreen();
+        });
+    }
+
     //SCREENS TO BE MADE: {
-
-    //public void minSpanInputScreen()
-
     //public void shortPathInputScreen()
 
     //public void minSpanResultScreen(String city)
@@ -272,14 +345,55 @@ public class RoadsUI extends Application {
         while(in.hasNextLine())
         {
             tokens = in.nextLine().split(",");
-            //to do, check formatting of line and add contents to the Graph
+
+            if(tokens.length == 3)
+            {
+                //if the last token contains a numeric value
+                if(tokens[2].trim().matches("\\d+") || tokens[2].trim().matches("\\d+" + "." + "\\d+"))
+                {
+                    if(!graph.contains(tokens[0].trim()))
+                        origins.add(tokens[0].trim());
+                    if(!graph.contains(tokens[1].trim()))
+                        origins.add(tokens[1].trim());
+
+                    graph.addNode(tokens[0].trim(), tokens[1].trim(), Double.parseDouble(tokens[2].trim()));
+                }
+            }
         }
+        FXCollections.sort(origins);
     }
 
     private void closeProgram(){
-        boolean answer = ConfirmBox.display("Exit Confirmation", "Are you sure you want to exit?");
+        boolean answer = ConfirmBox.display("Exit Confirmation", "Are you sure you want to exit?", window);
         if(answer)
             Platform.exit();
+    }
+
+    /**
+     * This will generate a new javafx bloom effect that will
+     * use a timeline to create a flashing light animation.
+     *
+     * @return The Bloom effect object with the timeline attached to it
+     */
+    private Bloom createFlashEffect()
+    {
+        //creates a timeline for an lighting animation
+        Timeline timeLine = new Timeline();
+
+        Bloom bloom = new Bloom();
+        //alternates the lighting from none to half of the max
+        KeyValue keyV1 = new KeyValue(bloom.thresholdProperty(), 0.0, Interpolator.EASE_OUT);
+        KeyValue keyV2 = new KeyValue(bloom.thresholdProperty(), 0.5, Interpolator.EASE_OUT);
+        KeyFrame keyF1 = new KeyFrame(Duration.millis(0.0), keyV1);
+        KeyFrame keyF2 = new KeyFrame(Duration.millis(150), keyV2);
+
+        //sets the timeline to cycle through an off/on lighting animation (even cycles = remains on, odd cycles = remains off)
+        timeLine.setCycleCount(5);//Timeline.INDEFINITE);
+        timeLine.setAutoReverse(true);
+        timeLine.getKeyFrames().addAll(keyF1, keyF2);
+        timeLine.play();
+
+        return bloom;
     }
 
 

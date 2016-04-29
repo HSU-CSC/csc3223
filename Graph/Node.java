@@ -1,10 +1,11 @@
 import java.util.HashMap;
+import java.util.Set;
 
 public class Node
     {
         protected String name;
         protected boolean visited;
-        protected HashMap<String, Integer> connections;
+        protected HashMap<String, Double> connections;
         protected Node next;
 
         /**
@@ -15,7 +16,7 @@ public class Node
         public Node(String name)
         {
             this.name = name;
-            connections = new HashMap<String,Integer>();
+            connections = new HashMap<String,Double>();
             visited = false;
         }//end node constructor
 
@@ -26,6 +27,11 @@ public class Node
         {
             return visited;
         }//end isVisited
+        
+        public void visit()
+        {
+        	visited = true;
+        }
 
         /**
          * This adds a connection to the current Node's HashMap containing another city's name and the distance
@@ -34,7 +40,7 @@ public class Node
          * @param cityName the city that it is being connected to.
          * @param distance the distance to the other city.
          */
-        public void addConnection(String cityName, Integer distance) {
+        public void addConnection(String cityName, Double distance) {
 
             //needs to check that the hash map doesn't already contain that city's name before adding it in.
             connections.put(cityName, distance);
@@ -43,4 +49,23 @@ public class Node
         /**
          * Prints out the adjacent cities and their distance to the node
          */
+       
+       public boolean hasConnections()
+       {
+    	   return !connections.isEmpty();
+       }
+       
+       public Set<String> getConnections()
+       {
+    	   return connections.keySet(); 
+       }
+       
+       public void printConnections()
+       {
+           System.out.println(connections.toString());
+       }//end printConnections
+       public String toString()
+       {
+    	   return name;
+       }
     }//end Node
