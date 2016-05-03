@@ -5,31 +5,22 @@ public class traversal
 
 public void traversal(Graph g, Node n, ArrayList<Node> visited)
     {
-    	//System.out.println(n+ " 1 ");
-		if(!n.isVisited())//checks if the node has been visited
+    	if(!node.isVisited())//checks if the node has been visited
 		{
-			n.visit();//visits node
-			visited.add(n);
-			if(n.hasConnections())//gets connections
+			node.visit();//visits node
+			visited.add(node);
+			
+			if(node.hasConnections())//gets connections
 			{
 				
-				for(String c : n.getConnections())//gets a set of connections iterates through them
+				for(String c : node.getConnections())//gets a set of connections iterates through them
 				{
-					if(g.contains(c))//makes sure the graph contains the element
-					{
-						if(!g.get(c).isVisited())//makes sure its not visited
+						if(!graph.get(c).isVisited())//makes sure its not visited
 						{
-							//System.out.println(g.get(c));
-							traversal(g,g.get(c),visited);   //if not visited then visit
-						}
-					}
-					else//if graph not contain the String c from set then somethin' broke
-					{
-						System.out.println("ERROR");
-					}
-				}
-			}
-			
-		}
+							traversal(graph,graph.get(c),visited);//if not visited then visit
+						}//end if
+				}//end for-each
+			}//end if
+		}//end if
     }
 }
