@@ -9,6 +9,8 @@
     -fx-background-radius: 4;
     -fx-border-radius: 4;
     -fx-border-color: #000000;
+    -fx-border-insets: 3;
+    -fx-background-insets: 3;
 }
 
 .button:hover {
@@ -23,6 +25,12 @@
     -fx-border-color: #000000;
 }
 
+.text_label {
+    -fx-padding: 5,10,20,40; //top,right,bottom,left
+    -fx-text-fill: #034159;
+    -fx-font-weight: bold;
+    /*-fx-font-size: 16;*/
+}
 
 #bold-label{
     -fx-font-weight: bold;
