@@ -1,4 +1,4 @@
 # csc3223
-Algorithm Analysis project (Spring 2016)
 
-There isn't much to see here. Come back later.
+
+<h1 style="font-size: 48px; color : yellow;">Algorithm Analysis project (Spring 2016)</h1>
