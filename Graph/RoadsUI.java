@@ -21,6 +21,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.io.File;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 
@@ -92,15 +93,13 @@ public class RoadsUI extends Application {
         StackPane stack = new StackPane();
         Text message = new Text();
 
-        back.setCancelButton(false);
-
         begin.setText("Begin");
-        begin.setDefaultButton(true);
         exit.setText("Exit");
-        exit.setCancelButton(true);
-        message.setText("Hello Everybody!");//Space to be used for program description
 
-        stack.getChildren().addAll(begin, exit, message);
+        message.setText("Hello Everybody!");//Space to be used for program description
+        message.getStyleClass().add("text_label");
+
+        stack.getChildren().addAll(message, exit, begin);
         StackPane.setAlignment(exit, Pos.BOTTOM_LEFT);
         StackPane.setAlignment(begin, Pos.BOTTOM_RIGHT);
         StackPane.setAlignment(message, Pos.CENTER);
@@ -128,7 +127,7 @@ public class RoadsUI extends Application {
     {
         final TextField tField = new TextField();
 
-        Label label = new Label("Please enter the source file path:");
+        Text message = new Text("Please enter the source file path:");
 
         Button browse = new Button("Browse");
 
@@ -140,17 +139,17 @@ public class RoadsUI extends Application {
 
         StackPane stack = new StackPane();
 
-        next.setDefaultButton(true);
-        back.setCancelButton(true);
-
         tField.setPromptText("C:\\documents\\jane\\cityRecord"); //Displays Prompt text as example file path
         tField.setPrefColumnCount(15);
         //makes use of css to make the prompt display initially
         tField.setStyle("-fx-prompt-text-fill: derive(-fx-control-inner-background,-30%); }");
 
-        hb.getChildren().addAll(label, tField, browse);
+        message.getStyleClass().add("text_label");
+        error.getStyleClass().add("text_label");
+
+        hb.getChildren().addAll(message, tField, browse);
         hb.setAlignment(Pos.CENTER);
-        hb.setSpacing(10.0);
+        hb.setSpacing(5.0);
 
         vb.getChildren().addAll(hb, error);
         vb.setAlignment(Pos.CENTER);
@@ -205,7 +204,6 @@ public class RoadsUI extends Application {
 
         back.setOnAction(event -> {
             event.consume();
-            back.setCancelButton(false);
             beginScreen();
         });
     }
@@ -235,17 +233,20 @@ public class RoadsUI extends Application {
 
         ComboBox cb = new ComboBox();
 
+        message.getStyleClass().add("text_label");
+        error.getStyleClass().add("text_label");
+
         hint.setFont(new Font(10.0));
         hint.setFill(Color.GREY);
 
         cb.setItems(FXCollections.observableArrayList("Determine Minimum Spanning Tree", "Determine Shortest Path"));
         //sets the title for the options to select from
         cb.setPromptText("Options");
-        tips.setText("HURRY UP AN CHOOSE A OPTION \nYA DINGUS!");
+        tips.setText("HURRY UP AN CHOOSE AN OPTION \nYA DINGUS!");
         tips.setTextAlignment(TextAlignment.CENTER);
         cb.setTooltip(tips);
 
-        //This makes use of an anonymous class declaration inorder to attach a listener to the ChoiceBox object.
+        //This makes use of an anonymous class declaration inorder to attach a listener to the ComboBox object.
         cb.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue ov, Number value, Number newValue)
             {
@@ -272,8 +273,7 @@ public class RoadsUI extends Application {
                 case 0 :
                    minSpanInputScreen(); break;
                 case 1 :
-                    //shortPathInputScreen()
-                    break;
+                    findRouteScreen(); break;
                 default : {
                     error.setText("Please choose an option to continue!");
                     error.setFill(Color.RED);
@@ -294,14 +294,18 @@ public class RoadsUI extends Application {
     {
         StackPane stack = new StackPane();
 
-        ComboBox<ListView> cb = new ComboBox(origins);
+        ComboBox<String> cb = new ComboBox(origins);
         Text message = new Text("Please choose one of the following origins: ");
+        Text error = new Text("");
         VBox vb = new VBox();
 
-        cb.setPromptText("Origins");
-        cb.setVisibleRowCount(4);
+        message.getStyleClass().add("text_label");
+        error.getStyleClass().add("text_label");
 
-        vb.getChildren().addAll(message, cb);
+        cb.setPromptText("Origins");
+        cb.setVisibleRowCount(2);
+
+        vb.getChildren().addAll(message, cb, error);
         vb.setAlignment(Pos.CENTER);
 
         stack.getChildren().addAll(vb, back, next);
@@ -311,8 +315,18 @@ public class RoadsUI extends Application {
         scene.setRoot(stack);
 
         next.setOnAction(event -> {
-            //event.consume();
-           // minSpanResultScreen(listBox.getSelectionModel().getSelectedItem());
+            event.consume();
+            if(cb.getSelectionModel().getSelectedItem() == null)
+            {
+                //user did not select an origin
+                error.setText("Please select an origin city to continue!");
+                error.setFill(Color.RED);
+                error.setEffect(createFlashEffect());
+            }
+            else
+            {
+                minSpanResultScreen(cb.getSelectionModel().getSelectedItem());
+            }
         });
 
         back.setOnAction(event -> {
@@ -321,11 +335,117 @@ public class RoadsUI extends Application {
         });
     }
 
+
+    private void findRouteScreen(){
+        final ObservableList<String> destinations = FXCollections.observableArrayList();
+
+        StackPane stack = new StackPane();
+
+        ComboBox<String> comboStart = new ComboBox(origins);
+        ComboBox<String> comboEnd = new ComboBox(destinations);
+
+        Text start = new Text("Origins:");
+        Text end = new Text("Destination:");
+        Text error = new Text();
+
+        HBox hb1 = new HBox(40);
+
+        VBox vbStart = new VBox(8);
+        VBox vbEnd = new VBox(8);
+        VBox vb = new VBox(8);
+
+        comboStart.setPromptText("Origin");
+        comboEnd.setPromptText("Destination");
+
+        comboStart.setVisibleRowCount(2);
+        comboEnd.setVisibleRowCount(2);
+
+        start.getStyleClass().add("text_label");
+
+        end.getStyleClass().add("text_label");
+
+        error.getStyleClass().add("text_label");
+
+        //Layout
+        vbStart.getChildren().addAll(start, comboStart);
+        vbEnd.getChildren().addAll(end, comboEnd);
+
+        hb1.getChildren().addAll(vbStart, vbEnd);
+        hb1.setAlignment(Pos.CENTER);
+
+        vb.getChildren().addAll(hb1, error);
+        vb.setAlignment(Pos.CENTER);
+
+        stack.getChildren().addAll(vb, back, next);
+        StackPane.setAlignment(back, Pos.BOTTOM_LEFT);
+        StackPane.setAlignment(next, Pos.BOTTOM_RIGHT);
+
+        scene.setRoot(stack);
+
+        comboStart.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            public void changed(ObservableValue ov, Number value, Number newValue)
+            {
+                //resets the destination selection when the origin is changed
+                comboEnd.getSelectionModel().select(null);
+
+                //grabs all possible destinations attached to the selected origin city and adds them to the ArrayList
+                destinations.setAll(graph.get(origins.get(newValue.intValue())).getConnections());
+                FXCollections.sort(destinations);
+            }
+        });
+
+        next.setOnAction(event -> {
+            event.consume();
+            if(comboStart.getSelectionModel().getSelectedItem() == null || comboEnd.getSelectionModel().getSelectedItem() == null)
+            {
+                // user did not select an origin or a destination
+                error.setText("Please be sure to choose an origin and destination!");
+                error.setFill(Color.RED);
+                error.setEffect(createFlashEffect());
+            }
+            else
+            {
+                //shortPathResultScreen(comboStart.getSelectionModel().getSelectedItem(), comboEnd.getSelectedModel().getSelectedItem());
+            }
+        });
+        back.setOnAction(event -> {
+            event.consume();
+            menuScreen();
+        });
+
+    }
+
+
+
+    public void minSpanResultScreen(String city)
+    {
+        String result = "";
+
+        StackPane stack = new StackPane();
+
+        Text results = new Text();
+
+        results.getStyleClass().add("text_label");
+
+      //ToDO create a message detailing the results of the min span tree
+
+        results.setText(result);
+
+        stack.getChildren().addAll(results, exit, menu);
+        StackPane.setAlignment(exit, Pos.BOTTOM_LEFT);
+        StackPane.setAlignment(menu, Pos.BOTTOM_RIGHT);
+
+        scene.setRoot(stack);
+
+        menu.setOnAction(event -> {
+            event.consume();
+            menuScreen();
+        });
+
+
+    }
+
     //SCREENS TO BE MADE: {
-    //public void shortPathInputScreen()
-
-    //public void minSpanResultScreen(String city)
-
     //public void shortPathResultScreen(String origin, String dest) }
 
     /**
@@ -342,21 +462,29 @@ public class RoadsUI extends Application {
         Scanner in = new Scanner(new File(fileName));
         String [] tokens;
 
+        String origin;
+        String destination;
+        String distance;
+
         while(in.hasNextLine())
         {
             tokens = in.nextLine().split(",");
 
             if(tokens.length == 3)
             {
+                distance = tokens[2].trim();
                 //if the last token contains a numeric value
-                if(tokens[2].trim().matches("\\d+") || tokens[2].trim().matches("\\d+" + "." + "\\d+"))
+                if(distance.matches("\\d+(\\.\\d+)?"))
                 {
-                    if(!graph.contains(tokens[0].trim()))
-                        origins.add(tokens[0].trim());
-                    if(!graph.contains(tokens[1].trim()))
-                        origins.add(tokens[1].trim());
+                    origin = tokens[0].trim();
+                    destination = tokens[1].trim();
 
-                    graph.addNode(tokens[0].trim(), tokens[1].trim(), Double.parseDouble(tokens[2].trim()));
+                    if(!graph.contains(origin))
+                        origins.add(origin);
+                    if(!graph.contains(destination))
+                        origins.add(destination);
+
+                    graph.addNode(origin, destination, Double.parseDouble(distance));
                 }
             }
         }
@@ -388,7 +516,7 @@ public class RoadsUI extends Application {
         KeyFrame keyF2 = new KeyFrame(Duration.millis(150), keyV2);
 
         //sets the timeline to cycle through an off/on lighting animation (even cycles = remains on, odd cycles = remains off)
-        timeLine.setCycleCount(5);//Timeline.INDEFINITE);
+        timeLine.setCycleCount(5);//Timeline.INDEFINITE); //use this if you like seizures
         timeLine.setAutoReverse(true);
         timeLine.getKeyFrames().addAll(keyF1, keyF2);
         timeLine.play();
