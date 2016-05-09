@@ -1,3 +1,5 @@
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
@@ -13,6 +15,7 @@ public class ConfirmBox {
 
         public static boolean display(String title, String message, Stage parent){
             Stage window = new Stage();
+            Tooltip secret = new Tooltip();
             window.initModality(Modality.APPLICATION_MODAL); //Forces to address this box
             window.setTitle(title);
             window.setHeight(100);
@@ -22,8 +25,11 @@ public class ConfirmBox {
             window.setY(parent.getY() + parent.getHeight() /2 - window.getHeight() /2);
             window.setResizable(false);
 
+            secret.setGraphic(new ImageView(new Image("Force.gif")));
+
             Label label = new Label();
             label.setText(message);
+            label.setTooltip(secret);
 
             Button btnYes = new Button("Yes");
             Button btnNo = new Button("No");

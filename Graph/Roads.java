@@ -6,6 +6,20 @@ import java.io.FileReader;
  */
 public class Roads
 {
+    Node start;
+    Graph graph;
+    String destination;
+    double distance;
+    boolean found;
+    
+    public Roads(Graph nGraph, String nDest)
+    {
+        graph = nGraph;
+        destination = nDest;
+        distance = 0;
+        found = false;
+    }
+
     public static void main(String[] args) throws FileNotFoundException
     {
     	Graph graph = new Graph();
@@ -25,7 +39,7 @@ public class Roads
             graph.addNode(city,destination,distance);
         }
 
-        traversal(graph,graph.getCurrent());
+        //traversal(graph,graph.getCurrent());
 
         System.out.print(1);
         minimumSpanningTree(graph,"Arkadelphia");
@@ -49,43 +63,89 @@ public class Roads
 
         in.close();
     }
-    
-    public static void traversal(Graph g, Node n)
+
+    /**
+     * Traversal Method for depth 1st. Takes a graph,and a starting node, the arrayList
+     * is only to track the visited nodes and for debugging purposes.
+     *
+     * Starts at the 1st node and check if visited if not then visit & add to arrayList.
+     * Then checks for connections if has connections. Then for-each connection
+     * check is visited if not visited call traversal again. Repeat until there are no more
+     * unvisited nodes then begin to reverse and finish the for-each loops for each call
+     * looking for unvisited nodes. Rinse & Repeat.
+     *
+     * @param graph
+     * @param node
+     * @param visited
+     */
+
+    public static void traversal(Graph graph, Node node, ArrayList<Node> visited)
     {
-    	ArrayList<Node> visited = new ArrayList<Node>();
-    	try
-    	{
-	    	for(Node x : g)// goes through graph
-	    	{
-	    		if(!x.isVisited())//checks if the node has been visited
-	    		{
-	    			x.visit();//visits node
-	    			visited.add(x);
-	    			if(x.hasConnections())//gets connections
-	    			{
-	    				for(String c : x.getConnections())//gets a set of connections iterates through them
-	    				{
-	    					if(g.contains(c))//makes sure the graph contains the element
-	    					{
-	    						if(!g.get(c).isVisited())//makes sure its not visited
-	    						{
-	    							g.get(c).visit();    //if not visited then visit
-	    							visited.add(g.get(c));
-	    						}
-	    					}
-	    					else//if graph not contain the String c from set then somethin' broke
-	    					{
-	    						System.out.println("ERROR");
-	    					}
-	    				}
-	    			}
-	    		}
-	    	}
-    	}
-    	catch(NoSuchElementException x)
-        {}
-    	System.out.println(visited);
-    }//end traversal
+        if(!node.isVisited())//checks if the node has been visited
+        {
+            node.visit();//visits node
+            visited.add(node);
+
+            if(node.hasConnections())//gets connections
+            {
+
+                for(String c : node.getConnections())//gets a set of connections iterates through them
+                {
+                    if(!graph.get(c).isVisited())//makes sure its not visited
+                    {
+                        traversal(graph,graph.get(c),visited);//if not visited then visit
+                    }//end if
+                }//end for-each
+            }//end if
+        }//end if
+    }
+
+    /**
+     *
+     * @param node
+     * @param dist
+     * @return
+     */
+    public void shortestPath(Node node,double dist)
+    {
+        if(found!= true)
+        {
+            if(node.connections.containsKey(destination))
+            {
+                found = true;
+                this.distance += node.connections.get(destination);
+                return;
+
+            }
+
+            else
+            {
+                for(double k : node.connections.values())
+                {
+                    if(k <= dist)
+                    {
+                        dist = k;
+                    }
+                }
+
+                for(String y :node.connections.keySet())
+                {
+                    if(node.connections.get(y) == dist)
+                    {
+                        if(!graph.get(y).isVisited()&& found!=true)
+                        {
+                            graph.get(y).visit();
+                            this.distance += node.connections.get(y);
+                            shortestPath(graph.get(y),1000);
+                        }
+                    }
+
+                }
+            }
+
+        }
+
+    }
 
     /**
      * Takes a start city and finds the smallest connection between all of the currently visited nodes. When a node
@@ -135,7 +195,7 @@ public class Roads
             currentMin = 0;
 
         }
-        System.out.println("Current total: "+total+"\n");
+        //System.out.println("Current total: "+total+"\n");
         return total;
     }//end minimumSpanningTree
 

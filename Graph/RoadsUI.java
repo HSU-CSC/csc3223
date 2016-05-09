@@ -9,6 +9,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.Bloom;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -21,7 +23,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.io.File;
 import java.io.IOException;
-import java.util.NoSuchElementException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 
@@ -33,8 +35,8 @@ public class RoadsUI extends Application {
     private Scene scene;
     private final ObservableList<String> origins = FXCollections.observableArrayList();
 
-    Stage window;
-    private final Graph graph = new Graph();
+    private Stage window;
+    private Graph graph = new Graph();
 
     final private Button exit = new Button("Exit");
     final private Button next = new Button("Next");
@@ -61,12 +63,16 @@ public class RoadsUI extends Application {
         scene = new Scene(new StackPane(), 450, 250);
         beginScreen();
 
-        //This will make use of a lambda expression to simplify the anonymous class declaration
-        //needed to make use of a listener for the exit button This syntax will be used for every
-        //button's listener.
+       //This will create a listener that will attempt to close the program whenever the exit button is pressed
         exit.setOnAction(event -> {
             event.consume();
             closeProgram();
+        });
+
+        //This will create a listener that will switch the displayed screen to the menu whenever the menu button is pressed
+        menu.setOnAction(event -> {
+            event.consume();
+            menuScreen();
         });
 
         //Close Request
@@ -91,13 +97,17 @@ public class RoadsUI extends Application {
 
         Button begin = new Button("Begin");
         StackPane stack = new StackPane();
-        Text message = new Text();
+        Label message = new Label();
+        Tooltip hidden = new Tooltip();
+        //secret
+        hidden.setGraphic(new ImageView(new Image("Hackerman.gif")));
 
         begin.setText("Begin");
         exit.setText("Exit");
 
         message.setText("Hello Everybody!");//Space to be used for program description
-        message.getStyleClass().add("text_label");
+        message.setFont(new Font(15));
+        message.setTooltip(hidden);
 
         stack.getChildren().addAll(message, exit, begin);
         StackPane.setAlignment(exit, Pos.BOTTOM_LEFT);
@@ -222,8 +232,9 @@ public class RoadsUI extends Application {
         VBox vb = new VBox();
 
         String [] descriptions = {"This option will ask for the name of your starting city\n and determine the" +
-                                  " shortest distance to all of the other cities.", "This option will ask for the" +
-                                  " name of two cites and will\n then determine the shortest path between them."};
+                                  " shortest distance to all of the other cities.", "This option will ask for the "+
+                                  "name of a starting city and will then create a path to traverse the graph..","This option will ask for the" +
+                                  " name of two cities and will\n then determine the shortest path length between them."};
 
         Text message = new Text("Please choose one of the following options:");
         Text hint = new Text("*Place Cursor on Option for a description*");
@@ -239,7 +250,7 @@ public class RoadsUI extends Application {
         hint.setFont(new Font(10.0));
         hint.setFill(Color.GREY);
 
-        cb.setItems(FXCollections.observableArrayList("Determine Minimum Spanning Tree", "Determine Shortest Path"));
+        cb.setItems(FXCollections.observableArrayList("Determine Cost of Minimum Spanning Tree", "Determine a Path", "Determine the Shortest Path Cost"));
         //sets the title for the options to select from
         cb.setPromptText("Options");
         tips.setText("HURRY UP AN CHOOSE AN OPTION \nYA DINGUS!");
@@ -266,13 +277,18 @@ public class RoadsUI extends Application {
 
         scene.setRoot(stack);
 
-
+        for(String x : origins)
+        {
+            graph.get(x).visited = false;
+        }
         next.setOnAction(event -> {
             switch(cb.getSelectionModel().getSelectedIndex())
             {
                 case 0 :
-                   minSpanInputScreen(); break;
+                   minSpanInputScreen(true); break;
                 case 1 :
+                    minSpanInputScreen(false); break;
+                case 2 :
                     findRouteScreen(); break;
                 default : {
                     error.setText("Please choose an option to continue!");
@@ -290,18 +306,19 @@ public class RoadsUI extends Application {
         });
     }
 
-    public void minSpanInputScreen()
+    public void minSpanInputScreen(boolean minSpanOrTraverse)
     {
         StackPane stack = new StackPane();
 
-        ComboBox<String> cb = new ComboBox(origins);
+        ComboBox<String> cb = new ComboBox();
         Text message = new Text("Please choose one of the following origins: ");
         Text error = new Text("");
         VBox vb = new VBox();
 
         message.getStyleClass().add("text_label");
         error.getStyleClass().add("text_label");
-
+        System.out.println(origins.size());
+        cb.setItems(origins);
         cb.setPromptText("Origins");
         cb.setVisibleRowCount(2);
 
@@ -325,7 +342,10 @@ public class RoadsUI extends Application {
             }
             else
             {
-                minSpanResultScreen(cb.getSelectionModel().getSelectedItem());
+                if(minSpanOrTraverse)
+                    minSpanResultScreen(cb.getSelectionModel().getSelectedItem());
+                else
+                    traversalResultScreen(cb.getSelectionModel().getSelectedItem());
             }
         });
 
@@ -338,11 +358,10 @@ public class RoadsUI extends Application {
 
     private void findRouteScreen(){
         final ObservableList<String> destinations = FXCollections.observableArrayList();
-
         StackPane stack = new StackPane();
 
-        ComboBox<String> comboStart = new ComboBox(origins);
-        ComboBox<String> comboEnd = new ComboBox(destinations);
+        ComboBox<String> comboStart = new ComboBox();
+        ComboBox<String> comboEnd = new ComboBox();
 
         Text start = new Text("Origins:");
         Text end = new Text("Destination:");
@@ -354,7 +373,9 @@ public class RoadsUI extends Application {
         VBox vbEnd = new VBox(8);
         VBox vb = new VBox(8);
 
+        comboStart.setItems(origins);
         comboStart.setPromptText("Origin");
+        comboEnd.setItems(destinations);
         comboEnd.setPromptText("Destination");
 
         comboStart.setVisibleRowCount(2);
@@ -387,10 +408,10 @@ public class RoadsUI extends Application {
             {
                 //resets the destination selection when the origin is changed
                 comboEnd.getSelectionModel().select(null);
+                destinations.setAll(origins);
+                //removes the origin as a possible destination
+                destinations.remove(comboStart.getSelectionModel().getSelectedItem());
 
-                //grabs all possible destinations attached to the selected origin city and adds them to the ArrayList
-                destinations.setAll(graph.get(origins.get(newValue.intValue())).getConnections());
-                FXCollections.sort(destinations);
             }
         });
 
@@ -405,7 +426,7 @@ public class RoadsUI extends Application {
             }
             else
             {
-                //shortPathResultScreen(comboStart.getSelectionModel().getSelectedItem(), comboEnd.getSelectedModel().getSelectedItem());
+                    displayShortPathScreen(comboStart.getSelectionModel().getSelectedItem(), comboEnd.getSelectionModel().getSelectedItem());
             }
         });
         back.setOnAction(event -> {
@@ -419,34 +440,86 @@ public class RoadsUI extends Application {
 
     public void minSpanResultScreen(String city)
     {
-        String result = "";
-
         StackPane stack = new StackPane();
 
-        Text results = new Text();
+        Label results = new Label();
 
-        results.getStyleClass().add("text_label");
+        Tooltip mystery = new Tooltip();
 
-      //ToDO create a message detailing the results of the min span tree
+        results.setWrapText(true);
 
-        results.setText(result);
+        results.setText("The weight cost of the minimum spanning tree is " + Roads.minimumSpanningTree(graph, city) + " miles");
+        results.setTextAlignment(TextAlignment.CENTER);
+        results.getStyleClass().add("text_comical");
+
+        mystery.setGraphic(new ImageView(new Image("ThumbsUp.gif")));
+        results.setTooltip(mystery);
 
         stack.getChildren().addAll(results, exit, menu);
+
+        StackPane.setAlignment(results, Pos.CENTER);
         StackPane.setAlignment(exit, Pos.BOTTOM_LEFT);
         StackPane.setAlignment(menu, Pos.BOTTOM_RIGHT);
 
         scene.setRoot(stack);
 
-        menu.setOnAction(event -> {
-            event.consume();
-            menuScreen();
-        });
-
-
+        //If exit or menu is pressed the listeners in start will handle it
     }
 
-    //SCREENS TO BE MADE: {
-    //public void shortPathResultScreen(String origin, String dest) }
+    public void displayShortPathScreen(String origin, String destination)
+    {
+        StackPane stack = new StackPane();
+
+        Text results = new Text();
+
+        Roads path = new Roads(graph, destination);
+        path.shortestPath(graph.get(origin), 1000);
+
+        results.setText("The total cost for the shortest path is " + path.distance);
+        results.getStyleClass().add("text_comical");
+        results.setTextAlignment(TextAlignment.CENTER);
+
+        stack.getChildren().addAll(results, exit, menu);
+
+        StackPane.setAlignment(results, Pos.CENTER);
+        StackPane.setAlignment(exit, Pos.BOTTOM_LEFT);
+        StackPane.setAlignment(menu, Pos.BOTTOM_RIGHT);
+
+        scene.setRoot(stack);
+
+        //If exit or menu is pressed the listeners in start will handle it
+    }
+
+    public void traversalResultScreen(String origin)
+    {
+        StackPane stack = new StackPane();
+
+        String result = "The path will start at ";
+
+        Label results = new Label();
+
+        ArrayList<Node> path = new ArrayList<>();
+
+        Roads.traversal(graph, graph.get(origin), path);
+
+        for(int i = 0; i < path.size(); i++)
+        {
+            result += (i != path.size() - 1)? path.get(i) + ", which then connects to " : path.get(i) + ", which is where your journey ends.";
+        }
+
+        results.setText(result);
+        results.setFont(new Font(15));
+        results.setWrapText(true);
+        results.setTextAlignment(TextAlignment.CENTER);
+
+        stack.getChildren().addAll(results, exit, menu);
+        StackPane.setAlignment(results, Pos.CENTER);
+        StackPane.setAlignment(exit, Pos.BOTTOM_LEFT);
+        StackPane.setAlignment(menu, Pos.BOTTOM_RIGHT);
+
+        scene.setRoot(stack);
+
+    }
 
     /**
      * This will convert a passed string value to a File object and
@@ -459,6 +532,8 @@ public class RoadsUI extends Application {
      */
     private void populateGraph(String fileName)throws IOException
     {
+        origins.clear();
+
         Scanner in = new Scanner(new File(fileName));
         String [] tokens;
 
@@ -479,9 +554,9 @@ public class RoadsUI extends Application {
                     origin = tokens[0].trim();
                     destination = tokens[1].trim();
 
-                    if(!graph.contains(origin))
+                    if(!origins.contains(origin))
                         origins.add(origin);
-                    if(!graph.contains(destination))
+                    if(!origins.contains(destination))
                         origins.add(destination);
 
                     graph.addNode(origin, destination, Double.parseDouble(distance));
